@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QScrollArea
 from PyQt5.QtGui import QPalette, QColor, QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QBuffer
 
 import crop
 from DragLabel import DraggableLabel
@@ -18,6 +18,7 @@ class App(QWidget):
         self.current_image_index = 0
 
         self.init_ui()
+        self.setAcceptDrops(True)
 
     def init_ui(self):
         self.setGeometry(400, 200, 500, 500)
@@ -41,7 +42,6 @@ class App(QWidget):
         self.folder_button.setStyleSheet("background-color: white; color: black;")
         self.folder_button.clicked.connect(self.show_dialog)
         left_layout.addWidget(self.folder_button)
-
 
         # 스크롤 코드
 
@@ -74,6 +74,29 @@ class App(QWidget):
 
         self.setLayout(layout)
         self.show()
+
+        # 드랍 코드 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat("application/x-dnditemdata"):
+            event.acceptProposedAction()
+    
+    def dropEvent(self, event):
+        if event.mimeData().hasFormat("application/x-dnditemdata"):
+            # 드롭된 이미지를 QByteArray에서 QPixmap으로 변환
+            byte_array = event.mimeData().data("application/x-dnditemdata")
+            buffer = QBuffer(byte_array)
+            buffer.open(QBuffer.ReadOnly)
+            pixmap = QPixmap()
+            pixmap.loadFromData(buffer.data(), "PNG")
+
+            # 드롭 위치에 라벨을 생성하고 이미지를 설정
+            label = QLabel(self)
+            label.setPixmap(pixmap)
+            label.move(event.pos())
+            label.show()
+
+            event.acceptProposedAction()
+
 
     def show_dialog(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
