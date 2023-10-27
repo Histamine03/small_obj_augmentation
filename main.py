@@ -82,20 +82,21 @@ class App(QWidget):
     
     def dropEvent(self, event):
         if event.mimeData().hasFormat("application/x-dnditemdata"):
-            # 드롭된 이미지를 QByteArray에서 QPixmap으로 변환
-            byte_array = event.mimeData().data("application/x-dnditemdata")
-            buffer = QBuffer(byte_array)
-            buffer.open(QBuffer.ReadOnly)
-            pixmap = QPixmap()
-            pixmap.loadFromData(buffer.data(), "PNG")
-
-            # 드롭 위치에 라벨을 생성하고 이미지를 설정
-            label = QLabel(self)
-            label.setPixmap(pixmap)
-            label.move(event.pos())
-            label.show()
-
-            event.acceptProposedAction()
+            label_position = event.pos()
+        
+        # QLabel 위젯의 크기
+            label_width = self.imageLabel.width()
+            label_height = self.imageLabel.height()
+        
+        # QPixmap 이미지의 크기
+            pixmap_width = self.imageLabel.pixmap().width()
+            pixmap_height = self.imageLabel.pixmap().height()
+        
+        # 이미지 기준으로 좌표 변환
+            image_x = label_position.x() * pixmap_width / label_width
+            image_y = label_position.y() * pixmap_height / label_height
+        
+            print("Dropped at (image coordinates):", image_x, image_y)
 
 
     def show_dialog(self):

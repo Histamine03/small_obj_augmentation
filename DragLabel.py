@@ -25,7 +25,13 @@ class DraggableLabel(QLabel):
 
             drag.setMimeData(mime_data)
             drag.setPixmap(self.pixmap().scaled(100, 100, Qt.KeepAspectRatio))
-            drag.setHotSpot(event.pos())
+            
+            # 크기 변환
+            scaled_pixmap = self.pixmap().scaled(100, 100, Qt.KeepAspectRatio)
+            drag.setPixmap(scaled_pixmap)
+
+            hot_spot = event.pos() - self.rect().topLeft()
+            drag.setHotSpot(hot_spot)
             drag.exec_(Qt.CopyAction | Qt.MoveAction)
 
     def dragEnterEvent(self, event):
@@ -34,6 +40,10 @@ class DraggableLabel(QLabel):
 
     def dropEvent(self, event):
         if event.mimeData().hasFormat("application/x-dnditemdata"):
+            # 드롭된 위치의 좌표 값을 얻기
+            drop_position = event.pos()
+            print("Dropped at:", drop_position.x(), drop_position.y())
+
             # 드롭된 이미지를 QByteArray에서 QPixmap으로 변환
             byte_array = event.mimeData().data("application/x-dnditemdata")
             buffer = QBuffer(byte_array)
@@ -41,6 +51,10 @@ class DraggableLabel(QLabel):
             pixmap = QPixmap()
             pixmap.loadFromData(buffer.data(), "PNG")
 
-            # 원본 이미지에 드롭된 이미지를 추가
-            self.setPixmap(pixmap)
+            # 드롭된 위치에 라벨을 생성하고 이미지를 설정
+            label = QLabel(self)
+            label.setPixmap(pixmap)
+            label.move(drop_position)
+            label.show()
+
             event.acceptProposedAction()
