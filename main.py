@@ -2,33 +2,13 @@ import sys
 import os
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, QScrollArea
 from PyQt5.QtGui import QPalette, QColor, QPixmap
-from PyQt5.QtCore import Qt, QFileInfo
-import time
+from PyQt5.QtCore import Qt
+
 import crop
+from DragLabel import DraggableLabel
 
-class DraggableLabel(QLabel):
-    def __init__(self, pixmap, parent=None):
-        super().__init__(parent)
-        self.setPixmap(pixmap)
-        self.setAcceptDrops(True)
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            drag = QDrag(self)
-            mime_data = QMimeData()
-            drag.setMimeData(mime_data)
-            drag.setPixmap(self.pixmap().scaled(100, 100, Qt.KeepAspectRatio))
-            drag.setHotSpot(event.pos())
-            drag.exec_(Qt.CopyAction | Qt.MoveAction)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasImage():
-            event.acceptProposedAction()
-
-    def dropEvent(self, event):
-        position = event.pos()
-        self.setPixmap(self.pixmap())
-
+# main APP
 class App(QWidget):
 
     def __init__(self):
@@ -64,6 +44,7 @@ class App(QWidget):
 
 
         # 스크롤 코드
+
         self.scroll_area = QScrollArea()
         self.scroll_content = QWidget()
         self.scroll_layout = QVBoxLayout(self.scroll_content)
@@ -71,6 +52,11 @@ class App(QWidget):
         self.scroll_area.setStyleSheet("color: white;")
         left_layout.addWidget(self.scroll_area)
         self.scroll_area.setWidget(self.scroll_content)
+
+
+        self.scroll_area.setWidgetResizable(True) 
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff) 
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         button_layout = QHBoxLayout()
         self.prev_button = QPushButton('Previous', self)
@@ -101,7 +87,7 @@ class App(QWidget):
         current_folder = os.getcwd()
         object_list = crop.save_cropped_images(current_folder, image_path)
         for filename in object_list:
-            pixmap = QPixmap(filename).scaled(200, 200, Qt.KeepAspectRatio)
+            pixmap = QPixmap(filename)
             label = DraggableLabel(pixmap, self.scroll_content)
             self.scroll_layout.addWidget(label)
 
