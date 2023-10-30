@@ -34,27 +34,28 @@ class DraggableLabel(QLabel):
             drag.setHotSpot(hot_spot)
             drag.exec_(Qt.CopyAction | Qt.MoveAction)
 
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("application/x-dnditemdata"):
-            event.acceptProposedAction()
+    # def dragEnterEvent(self, event):
+    #     if event.mimeData().hasFormat("application/x-dnditemdata"):
+    #         event.acceptProposedAction()
 
-    def dropEvent(self, event):
-        if event.mimeData().hasFormat("application/x-dnditemdata"):
-            # 드롭된 위치의 좌표 값을 얻기
-            drop_position = event.pos()
-            print("Dropped at:", drop_position.x(), drop_position.y())
+    # def dropEvent(self, event):
+    #     if event.mimeData().hasFormat("application/x-dnditemdata"):
 
-            # 드롭된 이미지를 QByteArray에서 QPixmap으로 변환
-            byte_array = event.mimeData().data("application/x-dnditemdata")
-            buffer = QBuffer(byte_array)
-            buffer.open(QBuffer.ReadOnly)
-            pixmap = QPixmap()
-            pixmap.loadFromData(buffer.data(), "PNG")
+    #         # 드롭된 위치의 좌표 값을 얻기
+    #         drop_position = event.pos()
+    #         print("Dropped at:", drop_position.x(), drop_position.y())
 
-            # 드롭된 위치에 라벨을 생성하고 이미지를 설정
-            label = QLabel(self)
-            label.setPixmap(pixmap)
-            label.move(drop_position)
-            label.show()
+    #         # 드롭된 이미지를 QByteArray에서 QPixmap으로 변환
+    #         byte_array = event.mimeData().data("application/x-dnditemdata")
+    #         buffer = QBuffer(byte_array)
+    #         buffer.open(QBuffer.ReadOnly)
+    #         pixmap = QPixmap()
+    #         pixmap.loadFromData(buffer.data(), "PNG")
 
-            event.acceptProposedAction()
+    #         # 드롭된 위치에 라벨을 생성하고 이미지를 설정
+    #         label = QLabel(self)
+    #         label.setPixmap(pixmap)
+    #         label.move(drop_position)
+    #         label.show()
+
+    #         event.acceptProposedAction()

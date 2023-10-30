@@ -15,6 +15,7 @@ class App(QWidget):
         super().__init__()
 
         self.image_list = []
+        self.object_list = []
         self.current_image_index = 0
 
         self.init_ui()
@@ -43,8 +44,7 @@ class App(QWidget):
         self.folder_button.clicked.connect(self.show_dialog)
         left_layout.addWidget(self.folder_button)
 
-        # 스크롤 코드
-
+# 스크롤 코드
         self.scroll_area = QScrollArea()
         self.scroll_content = QWidget()
         self.scroll_layout = QVBoxLayout(self.scroll_content)
@@ -52,18 +52,16 @@ class App(QWidget):
         self.scroll_area.setStyleSheet("color: white;")
         left_layout.addWidget(self.scroll_area)
         self.scroll_area.setWidget(self.scroll_content)
-
-
         self.scroll_area.setWidgetResizable(True) 
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff) 
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
+# 버튼 정의
         button_layout = QHBoxLayout()
         self.prev_button = QPushButton('Previous', self)
         self.prev_button.setStyleSheet("background-color: white; color: black;")
         self.prev_button.clicked.connect(self.prev_image)
         button_layout.addWidget(self.prev_button)
-
         self.next_button = QPushButton('Next', self)
         self.next_button.setStyleSheet("background-color: white; color: black;")
         self.next_button.clicked.connect(self.next_image)
@@ -75,7 +73,7 @@ class App(QWidget):
         self.setLayout(layout)
         self.show()
 
-        # 드랍 코드 
+# 드랍 코드 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("application/x-dnditemdata"):
             event.acceptProposedAction()
@@ -83,22 +81,32 @@ class App(QWidget):
     def dropEvent(self, event):
         if event.mimeData().hasFormat("application/x-dnditemdata"):
             label_position = event.pos()
-        
-        # QLabel 위젯의 크기
-            label_width = self.imageLabel.width()
-            label_height = self.imageLabel.height()
-        
-        # QPixmap 이미지의 크기
-            pixmap_width = self.imageLabel.pixmap().width()
-            pixmap_height = self.imageLabel.pixmap().height()
-        
-        # 이미지 기준으로 좌표 변환
+
+            label_width = self.preview_label.width()
+            label_height = self.preview_label.height()
+
+            pixmap_width = self.preview_label.pixmap().width()
+            pixmap_height = self.preview_label.pixmap().height()
+
             image_x = label_position.x() * pixmap_width / label_width
             image_y = label_position.y() * pixmap_height / label_height
-        
+
+            object_id = event.mimeData().text()
             print("Dropped at (image coordinates):", image_x, image_y)
 
+        if event.mimeData().hasText():
+            filename = event.mimeData().text()
+            print("선택된 객체의 파일 이름:", filename)
 
+# 객체를 초기화 시켜주는 코드 
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
+# 이미지 폴더를 선택하는 함수
     def show_dialog(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder:
@@ -107,14 +115,18 @@ class App(QWidget):
             self.current_image_index = 0
             self.display_image()
 
+#객체 업데이트
     def update_object(self, image_path):
+        self.object_list = []
         current_folder = os.getcwd()
-        object_list = crop.save_cropped_images(current_folder, image_path)
-        for filename in object_list:
+        self.object_list = crop.save_cropped_images(current_folder, image_path)
+        self.clear_layout(self.scroll_layout)
+        for filename in self.object_list:
             pixmap = QPixmap(filename)
             label = DraggableLabel(pixmap, self.scroll_content)
             self.scroll_layout.addWidget(label)
 
+#이미지를 보여주는 함수
     def display_image(self):
         if self.image_list:
             image_path = self.image_list[self.current_image_index]

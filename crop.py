@@ -20,8 +20,9 @@ def crop_image(image_path, bbox):
     return cropped_image
 
 def save_cropped_images(image_folder, file_name, output_folder="object"):
+    cropped_images = []
     txt_file_name = file_name.replace('.png', '.txt')
-    print(txt_file_name)
+    
     txt_file_path = os.path.join(image_folder, txt_file_name)
     img_file_path = os.path.join(image_folder, file_name)
     
@@ -32,7 +33,6 @@ def save_cropped_images(image_folder, file_name, output_folder="object"):
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
     
-    cropped_images = []
     with open(txt_file_path, "r") as f:
         for index, line in enumerate(f.readlines()):
             class_id, x, y, width, height = map(float, line.strip().split())
