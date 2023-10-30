@@ -94,10 +94,6 @@ class App(QWidget):
             object_id = event.mimeData().text()
             print("Dropped at (image coordinates):", image_x, image_y)
 
-        if event.mimeData().hasText():
-            filename = event.mimeData().text()
-            print("선택된 객체의 파일 이름:", filename)
-
 # 객체를 초기화 시켜주는 코드 
     def clear_layout(self, layout):
         while layout.count():
