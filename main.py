@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QBuffer
 
 import crop
 from DragLabel import DraggableLabel
-
+from Paste_image import paste_obj
 
 # main APP
 class App(QWidget):
@@ -91,8 +91,11 @@ class App(QWidget):
             image_x = max(0, min(label_position.x() * pixmap_width / label_width, pixmap_width - 1))
             image_y = max(0, min(label_position.y() * pixmap_height / label_height, pixmap_height - 1))
 
-            object_id = event.mimeData().text()
             print("Dropped at (image coordinates):", image_x, image_y)
+
+# 이미지 붙여넣기
+            image_path = self.image_list[self.current_image_index]    
+            paste_obj(image_path, object_path, image_x, image_y)
 
 # 객체를 초기화 시켜주는 코드 
     def clear_layout(self, layout):
@@ -119,7 +122,7 @@ class App(QWidget):
         self.clear_layout(self.scroll_layout)
         for filename in self.object_list:
             pixmap = QPixmap(filename)
-            label = DraggableLabel(pixmap, self.scroll_content)
+            label = DraggableLabel(pixmap, filename, self.scroll_content)
             self.scroll_layout.addWidget(label)
 
 #이미지를 보여주는 함수

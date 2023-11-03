@@ -5,18 +5,19 @@ from PyQt5.QtCore import QByteArray, QBuffer, Qt, QMimeData
 
 # <DraggableLabel 클래스>
 class DraggableLabel(QLabel):
-    def __init__(self, pixmap, parent=None):
+    def __init__(self, pixmap, object_info, parent=None):
         super().__init__(parent)
         self.setPixmap(pixmap)
         self.setAcceptDrops(True)
+        self.object_info = object_info
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            # 드래그 시작
+# 드래그 시작
             drag = QDrag(self)
             mime_data = QMimeData()
 
-            # 이미지를 QByteArray로 변환하여 mime_data에 저장
+# 이미지를 QByteArray로 변환하여 mime_data에 저장
             byte_array = QByteArray()
             buffer = QBuffer(byte_array)
             buffer.open(QBuffer.WriteOnly)
@@ -26,7 +27,7 @@ class DraggableLabel(QLabel):
             drag.setMimeData(mime_data)
             drag.setPixmap(self.pixmap().scaled(100, 100, Qt.KeepAspectRatio))
             
-            # 크기 변환
+# 크기 변환
             scaled_pixmap = self.pixmap().scaled(100, 100, Qt.KeepAspectRatio)
             drag.setPixmap(scaled_pixmap)
 
