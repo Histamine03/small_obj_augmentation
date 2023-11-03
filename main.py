@@ -88,8 +88,8 @@ class App(QWidget):
             pixmap_width = self.preview_label.pixmap().width()
             pixmap_height = self.preview_label.pixmap().height()
 
-            image_x = label_position.x() * pixmap_width / label_width
-            image_y = label_position.y() * pixmap_height / label_height
+            image_x = max(0, min(label_position.x() * pixmap_width / label_width, pixmap_width - 1))
+            image_y = max(0, min(label_position.y() * pixmap_height / label_height, pixmap_height - 1))
 
             object_id = event.mimeData().text()
             print("Dropped at (image coordinates):", image_x, image_y)
