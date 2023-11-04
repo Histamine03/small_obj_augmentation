@@ -3,16 +3,14 @@ import re
 import os
 
 def paste_obj(img_path, object_path, X, Y, output_folder="object"):
-    # 이미지 로드 및 객체 붙여넣기
+
     base_image = Image.open(img_path).convert("RGBA")
     object_image = Image.open(object_path).convert("RGBA")
-    
-    # 위치를 정수로 변환
+
     position = (int(X), int(Y))
     base_image.paste(object_image, position, object_image.split()[3])
     base_image.save(img_path)
     
-    # 객체의 라벨 데이터를 찾아서 업데이트
     match = re.search(r'(\d+)\.png$', object_path)
     if match:
         line_number = int(match.group(1))
@@ -20,13 +18,11 @@ def paste_obj(img_path, object_path, X, Y, output_folder="object"):
         print("No line number found in object path.")
         return
 
-    # 라벨 파일 경로 생성
     text_file_path = img_path.replace('.png', '.txt')
     if not os.path.exists(text_file_path):
         print(f"Label file {text_file_path} not found.")
         return
 
-    # 라벨 데이터 읽기 및 업데이트
     with open(text_file_path, 'r') as file:
         lines = file.readlines()
 
@@ -43,11 +39,11 @@ def paste_obj(img_path, object_path, X, Y, output_folder="object"):
         print("Line number exceeds the number of lines in the label file.")
         return
 
-    # 라벨 파일 저장
+# 라벨 파일 저장
     with open(text_file_path, 'w') as file:
         file.writelines(lines)
 
-    # 객체 이미지 저장
+# 객체 이미지 저장
     output_file_name = f"cropped_{line_number}.png"
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
