@@ -3,31 +3,58 @@ import re
 import os
 
 def paste_obj(img_path, object_path, X, Y, output_folder="object"):
+    # 이미지 로드 및 객체 붙여넣기
+    base_image = Image.open(img_path).convert("RGBA")
+    object_image = Image.open(object_path).convert("RGBA")
     
-    base_image = Image.open(img_path).convert("RGB")
-    object_image = Image.open(object_path).convert("RGB")
-    
-    base_image.paste(object_image, (X, Y), object_image)
+    # 위치를 정수로 변환
+    position = (int(X), int(Y))
+    base_image.paste(object_image, position, object_image.split()[3])
     base_image.save(img_path)
-
+    
+    # 객체의 라벨 데이터를 찾아서 업데이트
     match = re.search(r'(\d+)\.png$', object_path)
-    line_number = int(match.group(1))
+    if match:
+        line_number = int(match.group(1))
+    else:
+        print("No line number found in object path.")
+        return
 
-    text_file_path = img_path.replace('.png', 'txt')
+    # 라벨 파일 경로 생성
+    text_file_path = img_path.replace('.png', '.txt')
+    if not os.path.exists(text_file_path):
+        print(f"Label file {text_file_path} not found.")
+        return
+
+    # 라벨 데이터 읽기 및 업데이트
     with open(text_file_path, 'r') as file:
-            for i, line in enumerate(file):
-                if i == line_number:
-                    obj_info = line
-    X, y = X / base_image.width, y / base_image.height
+        lines = file.readlines()
 
-    with open(object_path, 'w') as file:
-        info = [obj_info[0], X, y, obj_info[3], obj_info[4]]
-        info = ' '.join(str(x) for x in info)+"\n"
-        file.write(info)
+    if line_number < len(lines):
+        parts = lines[line_number].split()
+        if len(parts) == 5:
+            parts[1] = str(X / base_image.width)  # x_center 업데이트
+            parts[2] = str(Y / base_image.height)  # y_center 업데이트
+            lines[line_number] = ' '.join(parts) + '\n'
+        else:
+            print("Label format incorrect.")
+            return
+    else:
+        print("Line number exceeds the number of lines in the label file.")
+        return
+
+    # 라벨 파일 저장
+    with open(text_file_path, 'w') as file:
+        file.writelines(lines)
+
+    # 객체 이미지 저장
+    output_file_name = f"cropped_{line_number}.png"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    output_path = os.path.join(output_folder, output_file_name)
+    object_image.save(output_path)
 
 # 객체 저장
     output_file_name = f"cropped_{line_number + 1}.png"
     output_file_name = os.path.join(output_folder, output_file_name)
     object_image.save(output_file_name)
-
-

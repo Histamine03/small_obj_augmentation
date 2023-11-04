@@ -94,7 +94,8 @@ class App(QWidget):
             print("Dropped at (image coordinates):", image_x, image_y)
 
 # 이미지 붙여넣기
-            image_path = self.image_list[self.current_image_index]    
+            image_path = self.image_list[self.current_image_index]
+            object_path = r"object/cropped_0.png"
             paste_obj(image_path, object_path, image_x, image_y)
 
 # 객체를 초기화 시켜주는 코드 
